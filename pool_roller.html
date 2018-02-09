@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<script>
+		// 
+
+			function poolRoll() {
+				var dice = document.getElementById('diceroll').value; // Grab value
+				var reMatch = /((\d+)d(\d+)\s)+k(\d+)/; // Check if it's in the correct format
+				var rePool = /(\d+)d(\d+)/;
+				var reKeep = /k(\d+)/;
+				if (reMatch.test(dice)){
+					var keep = 0;
+					var rollArray = [];
+					var resArray = dice.split(" ");
+					var totalDice = 0;
+					for (i = 0; i < resArray.length; i++) { 
+						if (rePool.test(resArray[i])) {
+							var res = resArray[i].split("d");
+							var number = Number(res[0]); //Number of dice
+							var denom = Number(res[1]); //Dice denomination
+							totalDice += number;
+							for (j = 0; j < number; j++) { 
+								var roll=Math.floor(Math.random()*denom) + 1; //Get decimal, multiple by denomination and round down, and one so range doesn't start at zero
+								rollArray.push(roll);
+								
+							};
+						} else if (reKeep.test(resArray[i])) {
+							var res = resArray[i].split("k");
+							keep = Number(res[1]);
+						};
+					};
+					var orderedRoll = rollArray.sort(function(a, b){return b-a});
+					var rollTotal = 0
+					if (keep <= totalDice){
+						for (l = 0; l < keep; l++) { 
+							rollTotal += orderedRoll[l];
+						};						
+						var rollText = rollTotal + " (" + orderedRoll.join(',  ') + ")"; //sort in descending order and add a space between each value
+						document.getElementById("results").innerHTML += rollText + "<br />";
+					} else {
+						document.getElementById("error").innerHTML = "Can't keep more dice then you roll!";
+					};
+				} else {
+					document.getElementById("error").innerHTML = "Please use the 'xdx kx' format";
+				}
+			};
+
+			function clearRoll() {
+				document.getElementById("results").innerHTML = '';
+			};
+		</script>
+
+		<style>
+			#error
+				{
+				    color: red;
+				}
+		</style>
+
+	</head>
+
+	<body>
+
+		For roll/keep systems enter the number of dice you want to roll separated by a space and the number of dice to keep. <br/>
+		Ex: To roll 3 d6, 4 d8, and 1d12, keeping the highest two rolls enter "3d6 4d8 1d12 k2"<br/><br/>
+		<form onsubmit="return false;">
+			<input type="text" id="diceroll" onkeydown = "if (event.keyCode == 13) {poolRoll()}"><br>
+			<button type="button" onclick="poolRoll()">Roll!</button>
+			<button type="button" onclick="clearRoll()">Clear</button>
+		</form>
+		<div id='error'></div>
+		<div id='results'></div>
+	</body>
+
+</html>

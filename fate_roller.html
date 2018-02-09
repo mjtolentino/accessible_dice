@@ -1,0 +1,39 @@
+<html>
+	<head>
+		<script>
+			function fateRoll() {
+				var rollArray = [];
+				var rollTotal = 0;
+				for (i = 0; i < 4; i++) { 
+					var roll=Math.floor(Math.random()*3) + 1; //Get decimal, multiple by 3 and round down, and one so range doesn't start at zero
+					console.log(roll);
+					if (roll == 1){
+						var rollValue = -1;
+						var rollSymbol = '-';
+					} else if (roll == 2) {
+						var rollValue = 0;
+						var rollSymbol = '0';						
+					} else if (roll == 3) {
+						var rollValue = 1;
+						var rollSymbol = '+';						
+					}
+					rollTotal += rollValue;
+					rollArray.push(rollSymbol);
+				}
+				var rollText = rollTotal + " = " + rollArray.sort(function(a, b){return b-a}).join(', '); //sort in descending order and add a space between each value
+				document.getElementById("results").innerHTML += rollText + "<br />";
+			};
+			// };
+		</script>
+
+	</head>
+
+	<body>
+
+		<form onsubmit="return false;">
+			<button type="button" onclick="fateRoll()">Roll Fate Dice!</button>
+		</form>
+		<div id='results'></div>
+	</body>
+
+</html>
