@@ -1,0 +1,118 @@
+<html>
+	<head>
+		<script>
+			// This will roll a number of dice at any denomination and can also add a modifier. It does a regex check to make sure the
+			function gensysRoll() {
+				var diceValue = document.getElementById('diceroll').value; // Grab value
+				// Split dice pools up in (digit, die type) pairs. Example: (2, f), (1, b)
+				var pools = diceValue.split(' ');
+				//var dice = diceValue.replace(/\s+/g, '');
+				var reBonus = /(\d+)b/ // Bonus dice
+				var reAbility = /(\d+)g/ // Ability dice
+				var reProficiency = /(\d+)y/ // Proficiency dice
+				var resultBonus = [
+					[0,0,0,0],
+					[0,0,0,0],
+					[1,0,0,0],
+					[1,1,0,0],
+					[0,2,0,0],
+					[0,1,0,0]
+				]; // Success/Failure, Advantage/Threats, Triumph, Dispair
+				var resultAbility = [
+					[0,0,0,0],
+					[1,0,0,0],
+					[1,0,0,0],
+					[2,0,0,0],
+					[0,1,0,0],
+					[0,1,0,0],
+					[1,1,0,0],
+					[0,2,0,0]
+				];
+				var resultProficiency = [
+					[0,0,0,0],
+					[1,0,0,0],
+					[1,0,0,0],
+					[2,0,0,0],
+					[2,0,0,0],
+					[0,1,0,0],
+					[1,1,0,0],
+					[1,1,0,0],
+					[1,1,0,0],
+					[0,2,0,0],
+					[0,2,0,0],
+					[0,0,1,0]
+				];
+				var totalSuccesses = 0;
+				var totalAdvantages = 0;
+				var totalTriumphs = 0;
+				var totalDispairs = 0;
+				var rollText = ""
+
+				document.getElementById("error").innerHTML = '';
+				//var reBasic = /(\d+)d(\d+)/; // Check if it's in the correct format
+				//var reModPlus = /(\d+)d(\d+)\+(\d+)/;
+				//var reModMinus = /(\d+)d(\d+)\-(\d+)/;
+				for (var i=0; i < pools.length;i++) {
+					pool = pools[i];
+					if (reBonus.test(pool)) {
+						var number = pool[0]
+						for (var x=0; x < number; x++) {
+							var roll = Math.floor(Math.random()*6)+1;
+							totalSuccesses += resultBonus[roll][0];
+							totalAdvantages += resultBonus[roll][1];
+						}
+					}
+					else if (reAbility.test(pool)) {
+						var number = pool[0]
+						for (var x=0; x < number; x++) {
+							var roll = Math.floor(Math.random()*8)+1;
+							totalSuccesses += resultAbility[roll][0];
+							totalAdvantages += resultAbility[roll][1];
+						}
+					}
+					else if (reProficiency.test(pool)) {
+						var number = pool[0]
+						for (var x=0; x < number; x++) {
+							var roll = Math.floor(Math.random()*12)+1;
+							totalSuccesses += resultProficiency[roll][0];
+							totalAdvantages += resultProficiency[roll][1];
+							totalTriumphs += resultProficiency[roll][2];
+						}
+					}
+	 				else {
+						document.getElementById("error").innerHTML = "Please use the xd format";
+						return;
+					};
+				};
+				rollText += totalSuccesses + " Successes " + totalAdvantages + " Advantage " + totalTriumphs + " Failure " + totalDispairs + " Threats<br />";
+				document.getElementById("results").innerHTML += rollText + "<br />";
+			};
+
+			function clearRoll() {
+				document.getElementById("results").innerHTML = '';
+			};
+		</script>
+
+		<style>
+			#error
+				{
+				    color: red;
+				}
+		</style>
+
+	</head>
+
+	<body>
+
+		Enter the dice you want to roll, for example to roll one bonus die, enter 1b.
+		<form onsubmit="return false;">
+			<input type="text" id="diceroll" onkeydown = "if (event.keyCode == 13)
+                        {gensysRoll()}"><br>
+			<button type="button" onclick="gensysRoll()">Roll!</button>
+			<button type="button" onclick="clearRoll()">Clear</button>
+		</form>
+		<div id='error'></div>
+		<div id='results'></div>
+	</body>
+
+</html>
