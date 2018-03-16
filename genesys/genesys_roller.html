@@ -1,0 +1,200 @@
+<html>
+	<head>
+		<script>
+			// This will roll a number of dice at any denomination and can also add a
+			// modifier. It does a regex check to make sure the
+			function gensysRoll() {
+				var diceValue = document.getElementById('diceroll').value; // Grab value
+				// Split dice pools up in (digit, die type) pairs. Example: (2, f), (1, b)
+				var pools = diceValue.split(' ');
+				//pools = pools.replace(/\s+/g, '');
+				pools = pools.filter(function(str) {return /\S*/.test(str);});
+				var reBonus 			= /(\d+)b/ // Bonus dice
+				var reAbility 		= /(\d+)a/ // Ability dice
+				var reProficiency = /(\d+)y/ // Proficiency dice; y sound more distinct than p
+				var reSetback 		= /(\d+)s/ // Bonus dice
+				var reDifficulty	= /(\d+)d/ // Ability dice
+				var reChallenge 	= /(\d+)c/ // Proficiency dice
+				var reSpecial			= /(\d+)f/ // Special ability dice
+				var resultBonus 	= [ [0,0,0], [0,0,0], [1,0,0], [1,1,0],
+				 	[0,2,0], [0,1,0] ]; // set of bonus die results
+				var resultAbility = [ [0,0,0], [1,0,0], [1,0,0], [2,0,0],
+					[0,1,0], [0,1,0], [1,1,0], [0,2,0] ]; // set of ability die results
+				var resultProficiency = [	[0,0,0], [1,0,0], [1,0,0],
+					[2,0,0], [2,0,0], [0,1,0], [1,1,0], [1,1,0], [1,1,0],
+					[0,2,0], [0,2,0], [0,0,1] ]; // set of proficiency die results
+				var resultSetBack = [ [0,0,0], [0,0,0], [-1,0,0], [-1,0,0], [0,-1,0],
+			 		[0,-1,0] ];// set of setback die results
+				var resultDifficulty = [ [0,0,0], [-1,0,0], [-2,0,0], [0,-1,0], [0,-1,0],
+					[0,-1,0], [0,-2,0], [-1,-1,0] ];// set of difficulty die results
+				// Failures, Threats, Dispairs
+				var resultChallenge = [	[0,0,0], [-1,0,0], [-1,0,0], [-2,0,0], [-2,0,0],
+					[0,-1,0], [0,-1,0], [-1,-1,0], [-1,-1,0], [0,-2,0], [0,-2,0], [0,0,-1] ];
+				var resultSpecial = [	-1 -1, -1, -1, -1, -1, -2,	1, 1, 2, 2, 2];
+				var totalSuccesses	= 0;
+				var totalAdvantages = 0;
+				var totalTriumphs 	= 0;
+				var totalDispairs 	= 0;
+				var totalSpecial 		= 0;
+				var rollText = ""
+				// Clear error message
+				document.getElementById("error").innerHTML = '';
+				// roll the dice
+				for (var i=0; i < pools.length;i++) {
+					pool = pools[i];
+					if (reBonus.test(pool)) {
+						var number = pool[0];
+						for (var x=0; x < number; x++) {
+							var roll = DieRoll(6);
+							totalSuccesses += resultBonus[roll][0];
+							totalAdvantages += resultBonus[roll][1];
+						}
+					}
+					else if (reAbility.test(pool)) {
+						var number = pool[0];
+						for (var x=0; x < number; x++) {
+							var roll = DieRoll(8);
+							totalSuccesses += resultAbility[roll][0];
+							totalAdvantages += resultAbility[roll][1];
+						}
+					}
+					else if (reProficiency.test(pool)) {
+						var number = pool[0]
+						for (var x=0; x < number; x++) {
+							var roll = DieRoll(12);
+							totalSuccesses += resultProficiency[roll][0];
+							totalAdvantages += resultProficiency[roll][1];
+							totalTriumphs += resultProficiency[roll][2];
+						}
+					}
+					else if (reSetback.test(pool)) {
+						var number = pool[0];
+						for (var x=0; x < number; x++) {
+							var roll = DieRoll(6);
+							totalSuccesses += resultSetBack[roll][0];
+							totalAdvantages += resultSetBack[roll][1];
+						}
+					}
+					else if (reDifficulty.test(pool)) {
+						var number = pool[0];
+						for (var x=0; x < number; x++) {
+							var roll = DieRoll(8);
+							totalSuccesses += resultDifficulty[roll][0];
+							totalAdvantages += resultDifficulty[roll][1];
+						}
+					}
+					else if (reChallenge.test(pool)) {
+						var number = pool[0];
+						for (var x=0; x < number; x++) {
+							var roll = DieRoll(12);
+							totalSuccesses += resultChallenge[roll][0];
+							totalAdvantages += resultChallenge[roll][1];
+							totalDispairs += resultChallenge[roll][2];
+						};
+					}
+					else if (reSpecial.test(pool)) {
+						var number = pool[0];
+						for (var x=0; x < number; x++) {
+							var roll = DieRoll(12);
+							totalSpecial += resultSpecial[roll];
+						};
+					}
+					else {
+						document.getElementById("error").innerHTML = "Please use the xd format";
+						return;
+					};
+				};
+				var blank = 1
+				// Output the number of Successes or Failures
+				if (totalSuccesses > 0) {
+					rollText += totalSuccesses + " Successes ";
+					blank = 0;
+				}
+				else if (totalSuccesses < 0) {
+					rollText += Math.abs(totalSuccesses) + " Failures ";
+					blank = 0;
+				}
+				// Output the number of Advantages or Threats
+				if (totalAdvantages > 0) {
+					rollText += totalAdvantages + " Advantages ";
+					blank = 0;
+				}
+				else if (totalAdvantages < 0) {
+					rollText += Math.abs(totalAdvantages) + " Threats ";
+					blank = 0;
+				}
+				// Output the number of Triumphs
+				if (totalTriumphs > 0) {
+					rollText += totalTriumphs + " Triumphs ";
+					blank = 0;
+				}
+				// Output the number of Dispairs
+				if (totalDispairs < 0) {
+					rollText += Math.abs(totalDispairs) + " Dispairs ";
+					blank = 0;
+				}
+				// Output Special Dice (e.g., Force dice)
+				if (totalSpecial > 0) {
+					rollText += totalSpecial + " White ";
+					blank = 0;
+				}
+				else if (totalSpecial < 0) {
+					rollText += Math.abs(totalSpecial) + " Black ";
+					blank = 0;
+				}
+				// If no result output blank.
+				if (blank == 1) {
+						rollText = 'Blank';
+				}
+
+				document.getElementById("results").innerHTML += rollText + "<br />";
+			};
+			/**
+			 * Returns a random integer between min (inclusive) and max (inclusive)
+			 * Using Math.round() will give you a non-uniform distribution!
+			 */
+			function DieRoll(max) {
+					// Roll dice; subtract 1 from result to return array index
+					return Math.floor(Math.random() * max);
+			}
+
+			function clearRoll() {
+				document.getElementById("results").innerHTML = '';
+			};
+		</script>
+
+		<style>
+			#error
+				{
+				    color: red;
+				}
+		</style>
+
+	</head>
+
+	<body>
+
+<p>Using xd format where x is the number of dice and d is the die type.</p>
+Dice Types:
+		<ul>
+			<li>a, Ability die.</li>
+			<li>b, Bonus die.</li>
+			<li>y, Proficiency die.</li>
+			<li>s, Setback die.</li>
+			<li>d, Difficulty.</li>
+			<li>c, Challenge die.</li>
+			<li>f, Special die.</li>
+		</ul>
+		<p>Example, 2 ability dice & 1 proficiency die verse a 2 difficulty:
+			 2a 1y 2d</p>
+		<form onsubmit="return false;">
+			<input type="text" id="diceroll" onkeydown = "if (event.keyCode == 13)
+                        {gensysRoll()}"><br>
+			<button type="button" onclick="gensysRoll()">Roll!</button>
+			<button type="button" onclick="clearRoll()">Clear</button>
+		</form>
+		<div id='error'></div>
+		<div id='results'></div>
+	</body>
+
+</html>
