@@ -1,0 +1,108 @@
+<html lang="en">
+	<head>
+		<title>7th Sea 1e Roller</title>
+		<script>
+		//
+			function poolRoll() {
+				const rollCount = Number(document.getElementById('dice_roll').value);
+				const keepCount = Number(document.getElementById('dice_keep').value);
+				document.getElementById("error").innerHTML = '';
+
+				if (rollCount >= keepCount){
+					let numTens = 0;
+					const rollArray = [];
+
+					for (let i = 0; i < rollCount; i++) {
+						// Get decimal, multiply by 10 and round down, add one so the range doesn't start at zero
+						const roll = Math.floor(Math.random() * 10) + 1;
+						if (roll === 10){
+							numTens += 1;
+						}
+						rollArray.push(roll);
+					}
+
+					let totalExplodingDice = 0;
+					let explodingDiceValue = 0;
+					const explodingRollArray = [];
+
+					if (keepCount >= numTens) {
+						for (let i = 0; i < numTens; i++) {
+							// Get decimal, multiply by 10 and round down, add one so the range doesn't start at zero
+							let rollExploding = Math.floor(Math.random() * 10) + 1;
+							totalExplodingDice += 1
+							explodingDiceValue += rollExploding
+							explodingRollArray.push(rollExploding);
+							while (rollExploding === 10) {
+								totalExplodingDice += 1
+								explodingDiceValue += rollExploding
+								explodingRollArray.push(rollExploding);
+								rollExploding = Math.floor(Math.random() * 10) + 1;
+							}
+						}
+					} else {
+						// TODO: If more tens are rolled then there are kept dice we should roll explosions for every
+						// TODO: 10, then only keep the number of kept dice. See github issues for an example
+						document.getElementById("results").innerHTML += "<p style=\"color:red;\">You need to roll the exploding dice separately</p>";
+					}
+
+					const orderedRollArray = rollArray.sort(function (a, b) {
+						return b - a
+					});
+
+					let keepValueArray = orderedRollArray.slice(0, keepCount)
+					const successes = keepValueArray.reduce((a,b)=>a+b) + explodingDiceValue;
+
+					// Bold the successful rolls
+					let rollText = successes + " [";
+					keepValueArray.forEach((keep) => rollText += "<strong>" + keep + "</strong>, ");
+
+					// Show unkept dice
+					rollText += orderedRollArray.slice(keepCount).join(", ") + "]"
+
+					// If dice exploded, show the added values and how many explosions occured
+					if (numTens > 0) {
+						rollText += " <span style=\"color:red;\"><strong>You rolled "
+								+ numTens
+								+ " exploding dice! </strong>("
+								+ explodingRollArray.join(", ")
+								+ ")</span>";
+					}
+
+					document.getElementById("results").innerHTML += "<p>" + rollText + "</p>";
+
+			} else {
+				document.getElementById("error").innerHTML = "Can't keep more dice than you roll!";
+			}
+		}
+
+			function clearRoll() {
+				document.getElementById("results").innerHTML = '';
+				document.getElementById("error").innerHTML = '';
+			}
+		</script>
+
+		<style>
+			#error
+				{
+				    color: red;
+				}
+		</style>
+
+	</head>
+
+	<body>
+
+<!--		For roll/keep systems enter the number of d10 you want to roll separated by a space and the number of dice to keep. <br/>-->
+<!--		Ex: To roll 3 d6, 4 d8, and 1d12, keeping the highest two rolls enter "3d6 4d8 1d12 k2"<br/><br/>-->
+		<form onsubmit="return false;">
+			<label for="dice_roll">Number of Dice to Roll: </label><input type="text" id="dice_roll" onkeydown = "if (event.keyCode === 13) {poolRoll()}"><br>
+			<label for="dice_keep">Number of Dice to Keep: </label><input type="text" id="dice_keep" onkeydown = "if (event.keyCode === 13) {poolRoll()}"><br>
+<!--			<label for="special_dice">Number of Special Dice: </label><input type="text" id="special_dice" onkeydown = "if (event.keyCode === 13) {poolRoll()}"><br>-->
+			<button type="button" onclick="poolRoll()">Roll!</button>
+			<button type="button" onclick="clearRoll()">Clear Roll History</button>
+		</form>
+		<div id='error'></div>
+		<div id='results'></div>
+	</body>
+
+</html>

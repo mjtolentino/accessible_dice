@@ -1,0 +1,57 @@
+<html>
+	<head>
+		<script>
+			// This will roll a number of d6 at any denomination and return the number of sixes rolled.
+			function simpleRoll() {
+				const numDice = document.getElementById('diceroll').value; // Grab value
+				const rollArray = [];
+				let numSixes = 0;
+
+				for (i = 0; i < numDice; i++) {
+					// Get decimal, multiply by denomination and round down, and one so the range doesn't start at zero
+					const roll = Math.floor(Math.random() * 6) + 1;
+					if (roll === 6){
+						numSixes += 1;
+					} else {
+						rollArray.push(roll);
+					}
+				}
+
+				let rollText = "";
+				if (numSixes >= 3){
+					rollText = "<span style=\"color:red;\"><strong>Critical Success! </strong></span>"
+				}
+
+				// Bold the successful rolls
+				let successText = numSixes + " Success(es) [";
+				for (i = 0; i < numSixes; i++) {
+					successText += '<strong>6</strong>, ';
+				}
+
+				// Sort in descending order and add a space between each value
+				let failureArray = rollArray.sort(function (a, b) { return b - a}).join(", ");
+
+				document.getElementById("results").innerHTML += '<p>' + rollText + successText + failureArray + ']</p>';
+			}
+
+			function clearRoll() {
+				document.getElementById("results").innerHTML = '';
+			}
+		</script>
+
+	</head>
+
+	<body>
+
+		Enter the number of dice in your pool
+		<form onsubmit="return false;">
+			<input type="text" id="diceroll" onkeydown = "if (event.keyCode === 13)
+                        {simpleRoll()}"><br>
+			<button type="button" onclick="simpleRoll()">Roll!</button>
+			<button type="button" onclick="clearRoll()">Clear Roll History</button>
+		</form>
+		<div id='error'></div>
+		<div id='results'></div>
+	</body>
+
+</html>
